@@ -1,33 +1,39 @@
 #!/usr/bin/python
 
-# Note: Python 2.7 for compliance with Domoticz
+# Note: Python 2.7 for compliance with Domoticz & FHEM
 
-# Full color support ( hex and RGB )
+# Full color support ( hex, RGB and HSV )
 # Full brightness support ( 0 - 100 )
+# Full saturation support ( 0 - 100 )
 # Full device and zone support
 
 # Usage:
-#  milight-home.py [DEVICE (0,7,8)] [ZONE (0,1,2,3,4)] [COMMAND ...]
+#  milight-home.py [DEVICE (0,1,7,8)] [ZONE (0,1,2,3,4)] [COMMAND ...]
 #
 # Commands are:
 #  ON
 #  OFF
+#  DIMUP                        Only for Device type 1
+#  DIMDOWN                      Only for Device type 1
+#  NIGHT                        Nightlight for Device type 1 & 8
 #  DISCO[1-9]
 #  DISCOFASTER
 #  DISCOSLOWER
 #  WHITE
+#  HUE (0-255)
+#  SATUR (0-100)
 #  BRIGHT (0-100)
 #  SPECTRUM                     Animates lamps through full color spectrum
 #  COLOR "(hex color)"          ie. "#ff0000" for red, "#0000ff" for blue ('#' char not needed)
 #  COLOR (red) (green) (blue)   ie. 255 0 0 for red, 0 0 255 for blue
 
-__author__ = 'Jasper Goes (Pander)'
-__email__ = "jasper@jaspergoes.nl"
+__author__ = 'Jasper Goes (Pander)' & 'Mathias Klein (Snocksman)'
+__email__ = "jasper@jaspergoes.nl" & 'snocksman@t-online.de'
 
 # Optional configuration
 BOX_REPT = 1  # Amount of times to repeat commands
-BOX_DISCOVERY = True  # Auto-discover BOX_ADDR
-BOX_ADDR = ""  # IP Address of iBox. To use this, set: BOX_DISCOVERY = False
+BOX_DISCOVERY = False  # Auto-discover BOX_ADDR
+BOX_ADDR = "192.168.1.11"  # IP Address of iBox. To use this, set: BOX_DISCOVERY = False
 BOX_PORT = 5987  # iBox port. Should not need any modification.
 
 # For basic usage, no further modification is nescessary beyond this line
@@ -43,7 +49,7 @@ LCL_PORT = 55054
 SESSPW = bytearray([255, 255])
 
 def usage():
-    print "Please specify a valid argument.\n\nUsage:\n milight-home.py [DEVICE (0,7,8)] [ZONE (0,1,2,3,4)] " \
+    print "Please specify a valid argument.\n\nUsage:\n milight-home.py [DEVICE (0,1,7,8)] [ZONE (0,1,2,3,4)] " \
           "[COMMAND ...]\n\nCommands are:\n ON\n OFF\n DISCO[1-9]\n DISCOFASTER\n DISCOSLOWER\n WHITE\n BRIGHT " \
           "(0-100)\n SPECTRUM\t\t\t\t\t\tAnimates lamps through full color spectrum\n COLOR \"(hex color)\"\t" \
           "\t\tie. \"#ff0000\" for red, \"#0000ff\" for blue\n COLOR (red) (green) (blue)\tie. 255 0 0 for red, 0 0 " \
@@ -160,20 +166,47 @@ if CMD == "ON":
     if DEVICE == 0:
         COMMAND = [0, 3, 3, 0, 0, 0, 0]
     else:
-        if DEVICE == 8:
-            COMMAND = [DEVICE, 4, 1, 0, 0, 0, ZONE]
+        if DEVICE == 1:
+            COMMAND = [DEVICE, 0, 7, 0, 0, 0, ZONE]
         else:
-            COMMAND = [DEVICE, 3, 1, 0, 0, 0, ZONE]
+            if DEVICE == 8:
+                COMMAND = [DEVICE, 4, 1, 0, 0, 0, ZONE]
+            else:
+                COMMAND = [DEVICE, 3, 1, 0, 0, 0, ZONE]
 
 elif CMD == "OFF":
     if DEVICE == 0:
         COMMAND = [0, 3, 4, 0, 0, 0, 0]
     else:
-        if DEVICE == 8:
-            COMMAND = [DEVICE, 4, 2, 0, 0, 0, ZONE]
+        if DEVICE == 1:
+            COMMAND = [DEVICE, 0, 8, 0, 0, 0, ZONE]
         else:
-            COMMAND = [DEVICE, 3, 2, 0, 0, 0, ZONE]
+            if DEVICE == 8:
+                COMMAND = [DEVICE, 4, 2, 0, 0, 0, ZONE]
+            else:
+                COMMAND = [DEVICE, 3, 2, 0, 0, 0, ZONE]
 
+elif CMD == "DIMUP":
+    if DEVICE == 1:
+        COMMAND = [DEVICE, 0, 1, 0, 0, 0, ZONE]
+    else:
+        print "DIMUP command only supported by device type 1."
+
+elif CMD == "DIMDOWN":
+    if DEVICE == 1:
+        COMMAND = [DEVICE, 0, 2, 0, 0, 0, ZONE]
+    else:
+        print "DIMDOWN command only supported by device type 1."
+
+elif CMD == "NIGHT":
+    if DEVICE == 1:
+        COMMAND = DEVICE, 0, 6, 0, 0, 0, ZONE]
+    else:
+        if DEVICE == 8:
+            COMMAND = [DEVICE, 4, 5, 0, 0, 0, ZONE]
+        else:
+            print "NIGHT command only supported by device Type 1 & 8."
+            
 elif CMD == "DISCOFASTER":
     if DEVICE == 0:
         COMMAND = [DEVICE, 3, 2, 0, 0, 0, 0]
@@ -200,6 +233,25 @@ elif CMD.startswith("DISCO"):
 elif CMD == "WHITE":
     COMMAND = [DEVICE, 3, 5, 0, 0, 0, ZONE]
 
+elif CMD == "HUE":
+    if len(sys.argv) == 5:
+        if DEVICE == 8:
+            HUE = max(0, min(255, int(sys.argv[4])))
+            COMMAND = [DEVICE, 1, HUE, HUE, HUE, HUE, ZONE]
+    else:
+        sock.close()
+        print "No value for HUE given. Add a 0 - 255 value for HUE.\n"
+        usage()
+
+elif CMD == "SATUR":
+    if len(sys.argv) == 5:
+        if DEVICE ==8:
+            COMMAND = [DEVICE, 2, max(0, min(100, int(sys.argv[4]))), 0, 0, 0, ZONE]
+    else:
+        sock.close()
+        print "No value for saturation given. Add a 0 - 100 value for saturation.\n"
+        usage()
+
 elif CMD == "BRIGHT":
     if len(sys.argv) == 5:
         if DEVICE == 8:
@@ -209,7 +261,7 @@ elif CMD == "BRIGHT":
     else:
         sock.close()
         print "No value for brightness given. Add a 0 - 100 value for brightness.\n"
-        usage()
+        usage()        
 
 elif CMD == "COLOR":
     if len(sys.argv) == 5 and re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', sys.argv[4]):
