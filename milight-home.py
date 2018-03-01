@@ -27,8 +27,8 @@
 #  COLOR "(hex color)"          ie. "#ff0000" for red, "#0000ff" for blue ('#' char not needed)
 #  COLOR (red) (green) (blue)   ie. 255 0 0 for red, 0 0 255 for blue
 
-__author__ = 'Jasper Goes (Pander)' & 'Mathias Klein (Snocksman)'
-__email__ = "jasper@jaspergoes.nl" & 'snocksman@t-online.de'
+__author__ = 'Jasper Goes (Pander) & Mathias Klein (Snocksman)'
+__email__ = "jasper@jaspergoes.nl & snocksman@t-online.de"
 
 # Optional configuration
 BOX_REPT = 1  # Amount of times to repeat commands
@@ -200,7 +200,7 @@ elif CMD == "DIMDOWN":
 
 elif CMD == "NIGHT":
     if DEVICE == 1:
-        COMMAND = DEVICE, 0, 6, 0, 0, 0, ZONE]
+        COMMAND = [DEVICE, 0, 6, 0, 0, 0, ZONE]
     else:
         if DEVICE == 8:
             COMMAND = [DEVICE, 4, 5, 0, 0, 0, ZONE]
