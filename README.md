@@ -18,7 +18,8 @@ Virtual switch for Milight v6 for use in Domoticz & FHEM
 -  DISCO[1-9]
 -  DISCOFASTER
 -  DISCOSLOWER
--  WHITE
+-  WHITE                        for Device type 0 & 8
+-  TEMP (0-100)                 White-Temperature for Device type 8
 -  HUE (0-255)
 -  SATUR (0-100)
 -  BRIGHT (0-100)
