@@ -19,7 +19,8 @@
 #  DISCO[1-9]
 #  DISCOFASTER
 #  DISCOSLOWER
-#  WHITE
+#  WHITE                        for Device type 0 & 8
+#  TEMP (0-100)                 White-Temperature for Device type 8
 #  HUE (0-255)
 #  SATUR (0-100)
 #  BRIGHT (0-100)
@@ -231,7 +232,22 @@ elif CMD.startswith("DISCO"):
         COMMAND = [DEVICE, 6, i, 0, 0, 0, ZONE]
 
 elif CMD == "WHITE":
-    COMMAND = [DEVICE, 3, 5, 0, 0, 0, ZONE]
+    if DEVICE == 0:
+        COMMAND = [DEVICE, 3, 5, 0, 0, 0, ZONE]
+    else:
+        if DEVICE == 8:
+            COMMAND = [DEVICE, 5, 64, 0, 0, 0, ZONE]
+        else:
+            print "WHITE command only supported by device Type 0 & 8."
+
+elif CMD == "TEMP":
+    if len(sys.argv) == 5:
+        if DEVICE ==8:
+            COMMAND = [DEVICE, 5, max(0, min(100, int(sys.argv[4]))), 0, 0, 0, ZONE]
+    else:
+        sock.close()
+        print "No value for White-Temperature given. Add a 0 - 100 value for Temperature.\n"
+        usage()
 
 elif CMD == "HUE":
     if len(sys.argv) == 5:
