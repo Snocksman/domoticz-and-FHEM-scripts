@@ -4,6 +4,7 @@ Virtual switch for Milight v6 for use in Domoticz & FHEM
 - Full color support ( hex, RGB and HSV )
 - Full brightness support ( 0 - 100 )
 - Full saturation support ( 0 - 100 )
+- Full white temperature support ( 0 - 100 )
 - Full device and zone support
 
  Usage:
